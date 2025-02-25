@@ -10,7 +10,7 @@
 version: 1
 
 sources:
-  - channel: bookworm main contrib
+  - channel: bookworm main non-free non-free-firmware
     urls:
       - https://snapshot-cloudflare.debian.org/archive/debian/20250225T084725Z
       - https://snapshot.debian.org/archive/debian/20250225T084725Z
@@ -33,5 +33,15 @@ packages:
   - "python3"
   - "xvfb"
   - "x11-apps"
+  - "fluxbox"
+  - "pulseaudio"
   # testing
   - "ffmpeg"
+  # drivers
+  - "mesa-va-drivers"
+  # - "intel-media-va-driver"
+  # - "intel-media-va-driver-non-free"
+  - "libgl1-mesa-glx"
+  - "mesa-utils"
+  # Apps
+  - "chromium-driver"

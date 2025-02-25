@@ -18,9 +18,17 @@ oci_image(
         "@bookworm//:flat",
         ":app_layer",
     ],
-    user = "nobody",
+    user = "root",
     env = {
         "DISPLAY": ":1.0",
+        # tells any program you run where to find a nonroot-specific directory
+        # in which it can store small temporary files.
+        "XDG_RUNTIME_DIR": "/home/nonroot/0",
+        # Pulseaudio ignores XDG_RUNTIME_DIR
+        "PULSE_SERVER": "/var/run/pulse/native",
+        "DBUS_STARTER_BUS_TYPE": "session",
+        "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/dbus/system_bus_socket",
+        "TEMP": "/home/nonroot",
     }
 )
 
