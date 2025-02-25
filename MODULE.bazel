@@ -1,0 +1,57 @@
+module(
+    name = "experiment",
+    version = "0.0.0",
+    compatibility_level = 1,
+)
+
+bazel_dep(name = "platforms", version = "0.0.11")
+bazel_dep(name = "aspect_bazel_lib", version = "2.13.0")
+bazel_dep(name = "rules_oci", version = "2.2.2")
+bazel_dep(name = "container_structure_test", version = "1.19.1")
+
+# For testing, we also recommend https://registry.bazel.build/modules/container_structure_test
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+
+# Declare external images you need to pull, for example:
+oci.pull(
+    name = "distroless_base",
+    image = "debian",
+    platforms = [
+        "linux/arm64/v8",
+        "linux/amd64",
+    ],
+    # 'latest' is not reproducible, but it's convenient.
+    # During the build we print a WARNING message that includes recommended 'digest' and 'platforms'
+    # values which you can use here in place of 'tag' to pin for reproducibility.
+    tag = "latest",
+)
+
+# For each oci.pull call, repeat the "name" here to expose them as dependencies.
+use_repo(oci, "distroless_base", "distroless_base_linux_amd64", "distroless_base_linux_arm64_v8")
+
+bazel_dep(name = "rules_distroless", version = "0.5.1")
+
+apt = use_extension(
+    "@rules_distroless//apt:extensions.bzl",
+    "apt",
+    dev_dependency = True,
+)
+apt.install(
+    name = "bookworm",
+    lock = "//examples:bookworm.lock.json",
+    manifest = "//examples:bookworm.yaml",
+)
+use_repo(apt, "bookworm")
+
+bazel_dep(name = "rules_python", version = "1.1.0")
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+
+pip.parse(
+    hub_name = "pip",
+    python_version = "3.11",
+    requirements_lock = "//:requirements_lock.txt",
+)
+
+use_repo(pip, "pip")
