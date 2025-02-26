@@ -21,9 +21,9 @@ async def main():
                 with Pulseaudio():
                     with FFmpeg(display=display):
                         browser = await get_browser()
-                        z = ZoomOperator(browser=browser)
+                        z = ZoomOperator(browser=browser, name="Debugger BOT")
                         await z.join(url)
-                        await z.post_join(n=1)
+                        await z.post_join(n=6)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 load("@container_structure_test//:defs.bzl", "container_structure_test")
 load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
-load("@aspect_bazel_lib//lib:tar.bzl", "tar")
+load("@aspect_bazel_lib//lib:tar.bzl", "tar", "mtree_spec")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 
@@ -36,18 +36,19 @@ tar(
 )
 
 tar(
-    name = "fix_ffmpeg",
-
-    mtree = select({
-        "@platforms//cpu:arm64": [
+    name = "fix_ffmpeg_arm64",
+    mtree = [
         "./usr/lib/aarch64-linux-gnu/libblas.so.3 type=link link=/usr/lib/aarch64-linux-gnu/blas/libblas.so.3",
         "./usr/lib/aarch64-linux-gnu/liblapack.so.3 type=link link=/usr/lib/aarch64-linux-gnu/lapack/liblapack.so.3",
-    ],
-        "@platforms//cpu:x86_64": [
+    ]
+)
+
+tar(
+    name = "fix_ffmpeg_x86_64",
+    mtree = [
         "./usr/lib/x86_64-linux-gnu/libblas.so.3 type=link link=/usr/lib/x86_64-linux-gnu/blas/libblas.so.3",
         "./usr/lib/x86_64-linux-gnu/liblapack.so.3 type=link link=/usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3",
-    ],
-    }),
+    ]
 )
 
 tar(
@@ -66,8 +67,10 @@ oci_image(
         "@bookworm//:flat",
         ":machine_id",
         ":app_layer",
-        ":fix_ffmpeg",
-    ],
+    ] + select({
+        "@platforms//cpu:arm64": [":fix_ffmpeg_arm64"],
+        "@platforms//cpu:x86_64": [":fix_ffmpeg_x86_64"],
+    }),
     user = "nonroot",
     env = {
         # tells any program you run where to find a nonroot-specific directory
