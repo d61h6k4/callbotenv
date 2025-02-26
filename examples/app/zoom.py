@@ -18,13 +18,15 @@ def get_meeting_id(url: str) -> str:
 async def get_browser():
     browser_config = nodriver.Config(
         headless=False,
-        sandbox=True,
+        sandbox=False,
         browser_args=[
             "--auto-accept-camera-and-microphone-capture",
             "--window-size=960x540",
             "--disable-dev-shm-usage",
             "--disable-extensions",
             "--disable-plugins",
+            "--log-path=/tmp/chrome.log",
+            "--verbose"
         ],
     )
     _LOGGER.info(
@@ -35,7 +37,7 @@ async def get_browser():
     )
 
     # warm up browser start
-    attempts = 2
+    attempts = 5
     while attempts > 0:
         try:
             browser = await nodriver.start(config=browser_config)

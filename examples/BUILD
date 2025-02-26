@@ -3,19 +3,64 @@ load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
 load("@aspect_bazel_lib//lib:tar.bzl", "tar", "mtree_spec")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@rules_distroless//distroless:defs.bzl", "cacerts", "group", "home", "passwd")
+
+passwd(
+    name = "passwd",
+    entries = [
+        {
+            "uid": 0,
+            "gid": 0,
+            "home": "/root",
+            "shell": "/bin/bash",
+            "username": "root",
+        },
+        {
+            "uid": 1000,
+            "gid": 1000,
+            "home": "/home/nonroot",
+            "shell": "/bin/bash",
+            "username": "nonroot",
+        },
+    ],
+)
+
+
+group(
+    name = "group",
+    entries = [
+        {
+            "name": "root",
+            "gid": 0,
+        },
+        {
+            "name": "nonroot",
+            "gid": 1000,
+        }
+    ]
+)
+
+home(
+    name = "home",
+    dirs = [
+        {
+            "home": "/root",
+            "uid": 0,
+            "gid": 0,
+        },
+        {
+            "home": "/home/nonroot",
+            "uid": 1000,
+            "gid": 1000,
+        },
+    ],
+)
 
 tar(
     name = "sh",
     mtree = [
         # needed as dpkg assumes sh is installed in a typical debian installation.
         "./bin/sh type=link link=/bin/bash",
-    ],
-)
-
-tar(
-    name = "awk",
-    mtree = [
-        "./usr/bin/awk type=link link=/usr/bin/mawk",
     ],
 )
 
@@ -29,8 +74,11 @@ tar(
     name = "machine_id",
     srcs = [":dbus_uuidgen"],
     mtree = [
-        "./home/nonroot/0 uid=65532 gid=65532 mode=0755 time=1672560000 type=dir",
-        "./run/dbus uid=65532 gid=65532 mode=0755 time=1672560000 type=dir",
+       "./tmp uid=0 gid=0 mode=1777 time=1672560000 type=dir",
+       "./home/nonroot uid=1000 gid=1000 mode=0755 time=1672560000 type=dir",
+       "./home/nonroot/0 uid=1000 gid=1000 mode=0755 time=1672560000 type=dir",
+       "./home/nonroot/tmp uid=1000 gid=1000 mode=0755 time=1672560000 type=dir",
+        "./run/dbus uid=1000 gid=1000 mode=0755 time=1672560000 type=dir",
         "./var/lib/dbus/machine-id uid=0 gid=0 time=1672560000 mode=0755 type=file content=$(location :dbus_uuidgen)"
     ]
 )
@@ -59,10 +107,12 @@ tar(
 oci_image(
     name = "image",
     base = "@distroless_base",
-    entrypoint = ["examples/app/main"],
+    entrypoint = ["/examples/app/main"],
     tars = [
+        ":passwd",
+        ":group",
+        ":home",
         ":sh",
-        ":awk",
         # This target contains all the installed packages.
         "@bookworm//:flat",
         ":machine_id",
@@ -76,10 +126,10 @@ oci_image(
         # tells any program you run where to find a nonroot-specific directory
         # in which it can store small temporary files.
         "XDG_RUNTIME_DIR": "/home/nonroot/0",
-        "DISPLAY": ":99",
+        "DISPLAY": ":1.0",
         "DBUS_STARTER_BUS_TYPE": "session",
         "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/dbus/system_bus_socket",
-        "TEMP": "/home/nonroot",
+        "TEMP": "/home/nonroot/tmp",
     }
 )
 

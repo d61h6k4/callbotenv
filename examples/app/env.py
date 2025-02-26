@@ -53,7 +53,6 @@ class Xvfb:
             raise RuntimeError(
                 f"Xvfb did not start ({ret_code}): {shlex.join(self._cmd)}\n{err.decode('utf8')}"
             )
-
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
@@ -143,7 +142,7 @@ class Pulseaudio:
             "--exit-idle-time=-1",
             "--disallow-exit",
             "--log-level=4",
-            "--log-target=newfile:/tmp/pulseaudio.log",
+            "--log-target=newfile:/home/nonroot/tmp/pulseaudio.log",
         ]
 
         self.proc = None
@@ -222,7 +221,7 @@ class FFmpeg:
             "2",
             "-i",
             "default",
-            "/tmp/output.mp4",
+            "/home/nonroot/tmp/output.mp4",
         ]
         self.proc = None
 

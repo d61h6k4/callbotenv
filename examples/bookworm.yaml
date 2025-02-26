@@ -10,44 +10,43 @@
 version: 1
 
 sources:
-  - channel: bookworm main non-free non-free-firmware
-    urls:
-      - https://snapshot-cloudflare.debian.org/archive/debian/20250225T084725Z
-      - https://snapshot.debian.org/archive/debian/20250225T084725Z
-  - channel: bookworm-security main
-    url: https://snapshot-cloudflare.debian.org/archive/debian-security/20250225T084725Z
-  - channel: bookworm-updates main
-    url: https://snapshot-cloudflare.debian.org/archive/debian/20250225T084725Z/
-  - channel: cloud-sdk main
-    url: https://packages.cloud.google.com/apt
+    - channel: bookworm main non-free non-free-firmware
+      urls:
+          - https://snapshot-cloudflare.debian.org/archive/debian/20250225T084725Z
+          - https://snapshot.debian.org/archive/debian/20250225T084725Z
+    - channel: bookworm-security main
+      url: https://snapshot-cloudflare.debian.org/archive/debian-security/20250225T084725Z
+    - channel: bookworm-updates main
+      url: https://snapshot-cloudflare.debian.org/archive/debian/20250225T084725Z/
+    - channel: cloud-sdk main
+      url: https://packages.cloud.google.com/apt
 
 archs:
-  - "amd64"
-  - "arm64"
+    - "amd64"
+    - "arm64"
 
 packages:
-  - "coreutils"
-  - "util-linux"
-  - "dpkg"
-  - "apt"
-  - "bash"
-  - "python3"
-  # Video
-  - "xvfb"
-  - "xauth"
-  - "fluxbox"
-  # Audio
-  - "dbus"
-  - "dbus-x11"
-  - "pulseaudio"
-  # testing
-  - "ffmpeg"
-  # drivers
-  # - "mesa-va-drivers"
-  # - "intel-media-va-driver"
-  # - "intel-media-va-driver-non-free"
-  - "libgl1-mesa-glx"
-  - "mesa-utils"
-  - "libgl1-mesa-dri"
-  # Apps
-  - "chromium-driver"
+    - "coreutils"
+    - "util-linux"
+    - "dpkg"
+    - "apt"
+    - "bash"
+    - "python3"
+    # Video
+    - "xvfb"
+    - "xauth"
+    - "fluxbox"
+    # background for fluxbox
+    - "eterm"
+    # Audio
+    - "dbus"
+    - "dbus-x11"
+    - "pulseaudio"
+    # testing
+    - "ffmpeg"
+    # drivers
+    - "libgl1-mesa-glx"
+    - "mesa-utils"
+    - "libgl1-mesa-dri"
+    # Apps
+    - "chromium-driver"

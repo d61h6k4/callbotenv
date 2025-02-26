@@ -23,8 +23,7 @@ async def main():
                         browser = await get_browser()
                         z = ZoomOperator(browser=browser, name="Debugger BOT")
                         await z.join(url)
-                        await z.post_join(n=6)
-
+                        await z.post_join(n=1)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

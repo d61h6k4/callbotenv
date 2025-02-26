@@ -339,32 +339,32 @@
     "@@rules_oci+//oci:extensions.bzl%oci": {
       "general": {
         "bzlTransitiveDigest": "qNlcd8WTd4UyzUfM/zpvBIVgvreRoBqBDGhBZr2NxbY=",
-        "usagesDigest": "2Vo4GSOHs9mOm6yJusZilrBZQm/jlQEbvc8AierZAno=",
+        "usagesDigest": "9cKXpWGdS4qCntSRwiXXo4JBleEPwLy1iHoxYayAjt8=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
         "generatedRepoSpecs": {
-          "distroless_base_linux_arm64_v8": {
-            "repoRuleId": "@@rules_oci+//oci/private:pull.bzl%oci_pull",
-            "attributes": {
-              "scheme": "https",
-              "registry": "gcr.io",
-              "repository": "distroless/base-debian12",
-              "identifier": "latest",
-              "platform": "linux/arm64/v8",
-              "target_name": "distroless_base_linux_arm64_v8",
-              "bazel_tags": []
-            }
-          },
           "distroless_base_linux_amd64": {
             "repoRuleId": "@@rules_oci+//oci/private:pull.bzl%oci_pull",
             "attributes": {
               "scheme": "https",
-              "registry": "gcr.io",
-              "repository": "distroless/base-debian12",
+              "registry": "index.docker.io",
+              "repository": "library/debian",
               "identifier": "latest",
               "platform": "linux/amd64",
               "target_name": "distroless_base_linux_amd64",
+              "bazel_tags": []
+            }
+          },
+          "distroless_base_linux_arm64_v8": {
+            "repoRuleId": "@@rules_oci+//oci/private:pull.bzl%oci_pull",
+            "attributes": {
+              "scheme": "https",
+              "registry": "index.docker.io",
+              "repository": "library/debian",
+              "identifier": "latest",
+              "platform": "linux/arm64/v8",
+              "target_name": "distroless_base_linux_arm64_v8",
               "bazel_tags": []
             }
           },
@@ -373,12 +373,12 @@
             "attributes": {
               "target_name": "distroless_base",
               "scheme": "https",
-              "registry": "gcr.io",
-              "repository": "distroless/base-debian12",
+              "registry": "index.docker.io",
+              "repository": "library/debian",
               "identifier": "latest",
               "platforms": {
-                "@@platforms//cpu:arm64": "@distroless_base_linux_arm64_v8",
-                "@@platforms//cpu:x86_64": "@distroless_base_linux_amd64"
+                "@@platforms//cpu:x86_64": "@distroless_base_linux_amd64",
+                "@@platforms//cpu:arm64": "@distroless_base_linux_arm64_v8"
               },
               "bzlmod_repository": "distroless_base",
               "reproducible": true
@@ -730,8 +730,8 @@
         "moduleExtensionMetadata": {
           "explicitRootModuleDirectDeps": [
             "distroless_base",
-            "distroless_base_linux_arm64_v8",
-            "distroless_base_linux_amd64"
+            "distroless_base_linux_amd64",
+            "distroless_base_linux_arm64_v8"
           ],
           "explicitRootModuleDirectDevDeps": [],
           "useAllRepos": "NO",
