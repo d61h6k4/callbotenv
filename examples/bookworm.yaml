@@ -50,4 +50,4 @@ packages:
   - "mesa-utils"
   - "libgl1-mesa-dri"
   # Apps
-  # - "chromium-driver"
+  - "chromium-driver"

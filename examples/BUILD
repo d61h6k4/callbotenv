@@ -37,10 +37,17 @@ tar(
 
 tar(
     name = "fix_ffmpeg",
-    mtree = [
+
+    mtree = select({
+        "@platforms//cpu:arm64": [
         "./usr/lib/aarch64-linux-gnu/libblas.so.3 type=link link=/usr/lib/aarch64-linux-gnu/blas/libblas.so.3",
         "./usr/lib/aarch64-linux-gnu/liblapack.so.3 type=link link=/usr/lib/aarch64-linux-gnu/lapack/liblapack.so.3",
-    ]
+    ],
+        "@platforms//cpu:x86_64": [
+        "./usr/lib/x86_64-linux-gnu/libblas.so.3 type=link link=/usr/lib/x86_64-linux-gnu/blas/libblas.so.3",
+        "./usr/lib/x86_64-linux-gnu/liblapack.so.3 type=link link=/usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3",
+    ],
+    }),
 )
 
 tar(
