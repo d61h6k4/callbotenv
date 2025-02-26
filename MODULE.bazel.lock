@@ -339,7 +339,7 @@
     "@@rules_oci+//oci:extensions.bzl%oci": {
       "general": {
         "bzlTransitiveDigest": "qNlcd8WTd4UyzUfM/zpvBIVgvreRoBqBDGhBZr2NxbY=",
-        "usagesDigest": "GNhsKaPuE/26ZNxBDmapnjpVow6elIZ9nFlHJKFYC0s=",
+        "usagesDigest": "2Vo4GSOHs9mOm6yJusZilrBZQm/jlQEbvc8AierZAno=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -348,8 +348,8 @@
             "repoRuleId": "@@rules_oci+//oci/private:pull.bzl%oci_pull",
             "attributes": {
               "scheme": "https",
-              "registry": "index.docker.io",
-              "repository": "library/debian",
+              "registry": "gcr.io",
+              "repository": "distroless/base-debian12",
               "identifier": "latest",
               "platform": "linux/arm64/v8",
               "target_name": "distroless_base_linux_arm64_v8",
@@ -360,8 +360,8 @@
             "repoRuleId": "@@rules_oci+//oci/private:pull.bzl%oci_pull",
             "attributes": {
               "scheme": "https",
-              "registry": "index.docker.io",
-              "repository": "library/debian",
+              "registry": "gcr.io",
+              "repository": "distroless/base-debian12",
               "identifier": "latest",
               "platform": "linux/amd64",
               "target_name": "distroless_base_linux_amd64",
@@ -373,8 +373,8 @@
             "attributes": {
               "target_name": "distroless_base",
               "scheme": "https",
-              "registry": "index.docker.io",
-              "repository": "library/debian",
+              "registry": "gcr.io",
+              "repository": "distroless/base-debian12",
               "identifier": "latest",
               "platforms": {
                 "@@platforms//cpu:arm64": "@distroless_base_linux_arm64_v8",

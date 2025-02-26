@@ -27,21 +27,27 @@ archs:
 
 packages:
   - "coreutils"
+  - "util-linux"
   - "dpkg"
   - "apt"
   - "bash"
   - "python3"
+  # Video
   - "xvfb"
-  - "x11-apps"
+  - "xauth"
   - "fluxbox"
+  # Audio
+  - "dbus"
+  - "dbus-x11"
   - "pulseaudio"
   # testing
   - "ffmpeg"
   # drivers
-  - "mesa-va-drivers"
+  # - "mesa-va-drivers"
   # - "intel-media-va-driver"
   # - "intel-media-va-driver-non-free"
   - "libgl1-mesa-glx"
   - "mesa-utils"
+  - "libgl1-mesa-dri"
   # Apps
-  - "chromium-driver"
+  # - "chromium-driver"
