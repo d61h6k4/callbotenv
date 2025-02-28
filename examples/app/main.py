@@ -25,7 +25,7 @@ async def main():
                         await z.join(url)
                         try:
                             await z.post_join(n=20)
-                        except KeyboardInterrupt:
+                        except Exception:
                             _LOGGER.info("Leaving...")
 
 if __name__ == "__main__":
