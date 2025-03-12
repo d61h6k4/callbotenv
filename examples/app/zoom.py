@@ -26,7 +26,7 @@ async def get_browser():
             "--disable-extensions",
             "--disable-plugins",
             "--log-path=/tmp/chrome.log",
-            "--verbose"
+            "--verbose",
         ],
     )
     _LOGGER.info(

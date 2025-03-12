@@ -13,12 +13,20 @@ py_library(
     ]
 )
 
+py_library(
+    name = "zoom_app",
+    srcs = ["zoom_app.py"],
+    deps = [
+        "@pip//pyautogui",
+    ]
+)
+
 py_binary(
   name = "main",
   srcs = ["main.py"],
   deps = [
     ":env",
-    ":zoom"
+    ":zoom_app"
   ],
   visibility = ["//visibility:public"]
 )

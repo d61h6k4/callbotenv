@@ -1,4 +1,6 @@
 import logging
+import os
+import hashlib
 import shlex
 import socket
 import subprocess
@@ -20,24 +22,26 @@ class Xvfb:
             "-screen",
             "0",
             f"{width}x{height}x{depth}",
+            "-ac",
+            "-auth",
+            "~/.Xauthority",
             "-dpi",
             "96",
             "-f",
             "0",
-            "-nocursor",
             "-nolisten",
             "tcp",
-            "-nolisten",
-            "unix",
             "+extension",
             "RANDR",
             "+extension",
-            "GLX",
+            "GLX"
         ]
 
         self.proc = None
 
+
     def __enter__(self):
+
         self.proc = subprocess.Popen(
             self._cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
@@ -59,6 +63,49 @@ class Xvfb:
         assert self.proc is not None
         if self.proc.returncode is not None:
             self.proc.terminate()
+
+
+class XAuth:
+    def __init__(
+        self, display: str = ":0"
+    ):
+        self._cmd = ["xauth", "add", display, ".", self.generate_mcookie()]
+        self.proc = None
+
+    @staticmethod
+    def generate_mcookie():
+        """
+        Generate a cookie string suitable for xauth.
+        """
+        data = os.urandom(16)  # 16 bytes = 128 bit
+        return hashlib.md5(data).hexdigest()
+
+    def __enter__(self):
+        Path("/home/nonroot/.Xauthority").touch()
+
+        self.proc = subprocess.Popen(
+            self._cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        _LOGGER.info(
+            f"XAuth started at {self.proc.pid} (returncode = {self.proc.returncode})"
+        )
+
+        ret_code = self.proc.poll()
+        if ret_code is not None:
+            _, err = self.proc.communicate()
+            raise RuntimeError(
+                f"Xauth did not start ({ret_code}): {shlex.join(self._cmd)}\n{err.decode('utf8')}"
+            )
+
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        assert self.proc is not None
+        if self.proc.returncode is not None:
+            self.proc.terminate()
+
 
 
 class Fluxbox:
@@ -107,9 +154,9 @@ class DBus:
         bus_address_path = bus_address.split("=")[1]
         self.dbus_session_address = Path(bus_address_path)
 
-        assert (
-            self.dbus_session_address.parent.exists()
-        ), f"{self.dbus_session_address.parent} expected to be exist"
+        assert self.dbus_session_address.parent.exists(), (
+            f"{self.dbus_session_address.parent} expected to be exist"
+        )
         self.proc = None
 
     def __enter__(self):

@@ -1,1 +1,3 @@
 nodriver
+pyautogui
+python-xlib>=0.33
