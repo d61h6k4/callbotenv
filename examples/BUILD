@@ -159,6 +159,7 @@ oci_image(
     name = "image",
     base = "@distroless_base",
     entrypoint = ["/examples/app/main"],
+    workdir = "/home/nonroot/tmp",
     tars = [
         ":passwd",
         ":group",
@@ -177,6 +178,7 @@ oci_image(
         # tells any program you run where to find a nonroot-specific directory
         # in which it can store small temporary files.
         "XDG_RUNTIME_DIR": "/home/nonroot/0",
+        "XDG_SESSION_TYPE": "x11",
         "DISPLAY": ":1.0",
         "DBUS_STARTER_BUS_TYPE": "session",
         "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/dbus/system_bus_socket",

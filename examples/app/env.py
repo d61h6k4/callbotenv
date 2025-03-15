@@ -14,7 +14,7 @@ class Xvfb:
     SLEEP_TIME_BEFORE_START = 0.1
 
     def __init__(
-        self, width: int = 960, height: int = 540, depth: int = 24, display: str = ":0"
+        self, width: int = 1280, height: int = 720, depth: int = 24, display: str = ":0"
     ):
         self._cmd = [
             "Xvfb",
@@ -251,7 +251,7 @@ class Pulseaudio:
 
 
 class FFmpeg:
-    def __init__(self, width: int = 960, height: int = 540, display: str = ":0"):
+    def __init__(self, width: int = 1280, height: int = 720, display: str = ":0"):
         self._cmd = [
             "ffmpeg",
             "-video_size",

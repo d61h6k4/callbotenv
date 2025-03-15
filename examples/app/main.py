@@ -21,15 +21,21 @@ async def main():
                 with DBus(bus_address=bus_address):
                     with Pulseaudio():
                         with FFmpeg(display=display):
-                            with ZoomApp(url):
+                            with ZoomApp(url) as zoom:
+                                loop = asyncio.get_running_loop()
+
+
+                                zoom.join()
+                                zoom.post_join()
                                 try:
-                                    n = 10
+                                    n = 180
                                     while n > 0:
                                         await asyncio.sleep(1)
                                         n -= 1
                                         _LOGGER.info(f"Waiting... {n}")
-                                except Exception:
-                                    _LOGGER.info("Leaving...")
+                                        _ = await loop.run_in_executor(None, zoom.check_banners)
+                                except Exception as e:
+                                    _LOGGER.info(f"Leaving... {repr(e)}")
 
 
 if __name__ == "__main__":
