@@ -12,12 +12,12 @@ version: 1
 sources:
     - channel: bookworm main non-free non-free-firmware
       urls:
-          - https://snapshot-cloudflare.debian.org/archive/debian/20250225T084725Z
-          - https://snapshot.debian.org/archive/debian/20250225T084725Z
+          - https://snapshot-cloudflare.debian.org/archive/debian/20250312T144852Z
+          - https://snapshot.debian.org/archive/debian/20250312T144852Z
     - channel: bookworm-security main
-      url: https://snapshot-cloudflare.debian.org/archive/debian-security/20250225T084725Z
+      url: https://snapshot-cloudflare.debian.org/archive/debian-security/20250312T144852Z
     - channel: bookworm-updates main
-      url: https://snapshot-cloudflare.debian.org/archive/debian/20250225T084725Z/
+      url: https://snapshot-cloudflare.debian.org/archive/debian/20250312T144852Z/
     - channel: cloud-sdk main
       url: https://packages.cloud.google.com/apt
 
@@ -46,7 +46,34 @@ packages:
     - "ffmpeg"
     # drivers
     - "libgl1-mesa-glx"
-    - "mesa-utils"
-    - "libgl1-mesa-dri"
     # Apps
     - "chromium-driver"
+    # Zoom deps
+    - "libglib2.0-0"
+    - "libxcb-shape0"
+    - "libxcb-shm0"
+    - "libxcb-xfixes0"
+    - "libxcb-randr0"
+    - "libxcb-image0"
+    - "libfontconfig1"
+    - "libxi6"
+    - "libsm6"
+    - "libxrender1"
+    - "libpulse0"
+    - "libxcomposite1"
+    - "libxslt1.1"
+    - "libsqlite3-0"
+    - "libxcb-keysyms1"
+    - "libxcb-xtest0"
+    - "ibus"
+    - "libatomic1"
+    - "libxcb-xinerama0"
+    - "libxcb-icccm4"
+    - "libxcb-render-util0"
+    - "libx11-xcb1"
+    - "libxcb-cursor0"
+    - "libxkbcommon-x11-0"
+    # PyAutoGui deps
+    - "scrot"
+    - "python3-tk"
+    - "python3-dev"

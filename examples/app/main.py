@@ -2,8 +2,8 @@ import asyncio
 import logging
 import os
 
-from examples.app.env import DBus, FFmpeg, Fluxbox, Pulseaudio, Xvfb
-from examples.app.zoom import ZoomOperator, get_browser
+from examples.app.env import DBus, FFmpeg, Fluxbox, Pulseaudio, XAuth, Xvfb
+from examples.app.zoom_app import ZoomApp
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -16,17 +16,27 @@ async def main():
     assert url is not None
 
     with Xvfb(display=display):
-        with Fluxbox(display=display):
-            with DBus(bus_address=bus_address):
-                with Pulseaudio():
-                    with FFmpeg(display=display):
-                        browser = await get_browser()
-                        z = ZoomOperator(browser=browser, name="Debugger BOT")
-                        await z.join(url)
-                        try:
-                            await z.post_join(n=20)
-                        except Exception:
-                            _LOGGER.info("Leaving...")
+        with XAuth(display=display):
+            with Fluxbox(display=display):
+                with DBus(bus_address=bus_address):
+                    with Pulseaudio():
+                        with FFmpeg(display=display):
+                            with ZoomApp(url) as zoom:
+                                loop = asyncio.get_running_loop()
+
+
+                                zoom.join()
+                                zoom.post_join()
+                                try:
+                                    n = 180
+                                    while n > 0:
+                                        await asyncio.sleep(1)
+                                        n -= 1
+                                        _LOGGER.info(f"Waiting... {n}")
+                                        _ = await loop.run_in_executor(None, zoom.check_banners)
+                                except Exception as e:
+                                    _LOGGER.info(f"Leaving... {repr(e)}")
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

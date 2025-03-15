@@ -13,12 +13,25 @@ py_library(
     ]
 )
 
+py_library(
+    name = "zoom_app",
+    srcs = ["zoom_app.py"],
+    data = [
+        "//examples/app/zoom_elements:images"
+    ],
+    deps = [
+        "@pip//pyautogui",
+        "@pip//opencv_python",
+        "@rules_python//python/runfiles"
+    ]
+)
+
 py_binary(
   name = "main",
   srcs = ["main.py"],
   deps = [
     ":env",
-    ":zoom"
+    ":zoom_app"
   ],
   visibility = ["//visibility:public"]
 )
