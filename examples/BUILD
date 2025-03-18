@@ -4,6 +4,9 @@ load("@aspect_bazel_lib//lib:tar.bzl", "tar", "mtree_spec")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_distroless//distroless:defs.bzl", "cacerts", "group", "home", "passwd")
+load("@rules_distroless//distroless:defs.bzl", "locale")
+
+
 
 passwd(
     name = "passwd",
@@ -104,10 +107,59 @@ tar(
     srcs = ["//examples/app:main"]
 )
 
+genrule(
+    name = "zoom_layer",
+    srcs = ["@zoom//:data.tar.xz"],
+    outs = ["layer.tar.gz"],
+    cmd = """
+    # Per the dpkg-dev man page:
+    # https://manpages.debian.org/bookworm/dpkg-dev/deb.5.en.html
+    #
+    # Debian data.tar files can be:
+    #  - .tar uncompressed, supported since dpkg 1.10.24
+    #  - .tar compressed with
+    #    *  gzip: .gz
+    #    * bzip2: .bz2, supported since dpkg 1.10.24
+    #    *  lzma: .lzma, supported since dpkg 1.13.25
+    #    *    xz: .xz, supported since dpkg 1.15.6
+    #    *  zstd: .zst, supported since dpkg 1.21.18
+    #
+    # ZSTD_BIN can decompress all formats except bzip2
+    #
+    # The OCI image spec supports .tar and .tar compressed with gzip or zstd.
+    # Bazel needs the output filename to be fixed in advanced so we settle for
+    # gzip compression.
+
+    data_file="$<"
+    layer="$@"
+
+    case "$$data_file" in
+        *data.tar.gz)
+            mv "$$data_file" "$$layer"
+        ;;
+        *data.tar)
+            $(ZSTD_BIN) --compress --format=gzip "$$data_file" > "$$layer"
+        ;;
+        *data.tar.xz|*data.tar.zst|*data.tar.lzma)
+            $(ZSTD_BIN) --force --decompress --stdout "$$data_file" |
+            $(ZSTD_BIN) --compress --format=gzip - > "$$layer"
+        ;;
+        *)
+            echo "ERROR: data file not supported: $$data_file"
+            exit 1
+        ;;
+    esac
+    """,
+    toolchains = ["@zstd_toolchains//:resolved_toolchain"],
+    visibility = ["//visibility:public"],
+)
+
+
 oci_image(
     name = "image",
     base = "@distroless_base",
     entrypoint = ["/examples/app/main"],
+    workdir = "/home/nonroot/tmp",
     tars = [
         ":passwd",
         ":group",
@@ -119,17 +171,19 @@ oci_image(
         ":app_layer",
     ] + select({
         "@platforms//cpu:arm64": [":fix_ffmpeg_arm64"],
-        "@platforms//cpu:x86_64": [":fix_ffmpeg_x86_64"],
+        "@platforms//cpu:x86_64": [":fix_ffmpeg_x86_64", ":zoom_layer"],
     }),
     user = "nonroot",
     env = {
         # tells any program you run where to find a nonroot-specific directory
         # in which it can store small temporary files.
         "XDG_RUNTIME_DIR": "/home/nonroot/0",
+        "XDG_SESSION_TYPE": "x11",
         "DISPLAY": ":1.0",
         "DBUS_STARTER_BUS_TYPE": "session",
         "DBUS_SESSION_BUS_ADDRESS": "unix:path=/run/dbus/system_bus_socket",
         "TEMP": "/home/nonroot/tmp",
+        "XAUTHORITY": "/home/nonroot/.Xauthority",
     }
 )
 
