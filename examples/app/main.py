@@ -34,6 +34,7 @@ async def main():
                                         n -= 1
                                         _LOGGER.info(f"Waiting... {n}")
                                         _ = await loop.run_in_executor(None, zoom.check_banners)
+                                        _ = await loop.run_in_executor(None, zoom.show_toolbars)
                                 except Exception as e:
                                     _LOGGER.info(f"Leaving... {repr(e)}")
 

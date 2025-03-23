@@ -29,7 +29,7 @@ _ZOOM_CONFIG = textwrap.dedent("""
             enableAlphaBuffer=true
             enableCloudSwitch=false
             enableLog=true
-            enableMiniWindow=true
+            enableMiniWindow=false
             enableQmlCache=true
             enableScreenSaveGuard=false
             enableStartMeetingWithRoomSystem=false
@@ -234,6 +234,7 @@ class ZoomApp:
                 _LOGGER.error(f"Zoom Audio/Video select device form is not ready yet!")
                 time.sleep(1)
                 attempts -= 1
+                self.check_banners()
             else:
                 break
         else:
@@ -279,6 +280,51 @@ class ZoomApp:
         except TypeError:
             _LOGGER.error("Could not join with computer audio!")
 
+        # Enter fullscreen
+        with self.pyautogui.hold('alt'):
+            self.pyautogui.press('f11')
+        _LOGGER.info("Entered fullscreen")
+
+    def show_toolbars(self):
+
+        view = self.r.Rlocation("_main/examples/app/zoom_elements/view.png")
+
+        try:
+            x, y = self.pyautogui.locateCenterOnScreen(view, confidence=0.9)
+            _LOGGER.info("Press view button ..")
+            self.pyautogui.click(x, y)
+        except Exception as e:
+            _LOGGER.error(repr(e))
+
+        gallery_view = self.r.Rlocation("_main/examples/app/zoom_elements/gallery_view.png")
+        try:
+            x, y = self.pyautogui.locateCenterOnScreen(gallery_view, confidence=0.9)
+            _LOGGER.info("Press gallery view button ..")
+            self.pyautogui.click(x, y)
+        except Exception as e:
+            _LOGGER.error(repr(e))
+            ...
+
+
+        try:
+            x, y = self.pyautogui.locateCenterOnScreen(view, confidence=0.9)
+            _LOGGER.info("Press view button ..")
+            self.pyautogui.click(x, y)
+        except Exception as e:
+            _LOGGER.error(repr(e))
+            ...
+
+
+        fullscreen = self.r.Rlocation("_main/examples/app/zoom_elements/fullscreen.png")
+
+        try:
+            x, y = self.pyautogui.locateCenterOnScreen(fullscreen, confidence=0.9)
+            _LOGGER.info("Press fullscreen button ..")
+            self.pyautogui.click(x, y)
+        except Exception as e:
+            _LOGGER.error(repr(e))
+            ...
+
     def check_banners(self):
         ok = self.r.Rlocation("_main/examples/app/zoom_elements/ok.png")
 
@@ -296,6 +342,17 @@ class ZoomApp:
         try:
             x, y = self.pyautogui.locateCenterOnScreen(got_it, confidence=0.9)
             _LOGGER.info("Press OK button ..")
+            self.pyautogui.click(x, y)
+            return True
+        except Exception as e:
+            _LOGGER.error(repr(e))
+
+
+        i_agree = self.r.Rlocation("_main/examples/app/zoom_elements/i_agree.png")
+
+        try:
+            x, y = self.pyautogui.locateCenterOnScreen(i_agree, confidence=0.9)
+            _LOGGER.info("Press I agree button ..")
             self.pyautogui.click(x, y)
             return True
         except Exception as e:

@@ -130,6 +130,11 @@ class Fluxbox:
                 f"Fluxbox did not start ({ret_code}): {shlex.join(self._cmd)}\n{err.decode('utf8')}"
             )
 
+        Path("/home/nonroot/.fluxbox").mkdir(exist_ok=True)
+        Path("/home/nonroot/.fluxbox/keys").write_text(
+            "Mod1 F11 :Fullscreen\n"
+        )
+
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
