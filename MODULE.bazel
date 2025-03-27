@@ -63,6 +63,5 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 http_archive(
     name = "zoom",
     build_file_content = 'exports_files(["data.tar.xz"])',
-    sha256 = "7a67473083a257ab79084b8e9f8c40aa85e30f248bccf91d7018a1c3abb84a36",
     urls = ["https://zoom.us/client/6.3.11.7212/zoom_amd64.deb"],
 )
