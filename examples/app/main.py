@@ -21,22 +21,27 @@ async def main():
                 with DBus(bus_address=bus_address):
                     with Pulseaudio():
                         with FFmpeg(display=display):
-                            with ZoomApp(url) as zoom:
-                                loop = asyncio.get_running_loop()
+                            zoom = await ZoomApp.create(logger=_LOGGER)
 
+                            try:
+                                _ = await zoom.join(url)
+                            except RuntimeError as e:
+                                import shutil
+                                shutil.copytree("/home/nonroot/.zoom", "/home/nonroot/tmp/zoom")
+                                _LOGGER.info("Leaving... {repr(e)}")
+                                return
 
-                                zoom.join()
-                                zoom.post_join()
-                                try:
-                                    n = 180
-                                    while n > 0:
-                                        await asyncio.sleep(1)
-                                        n -= 1
-                                        _LOGGER.info(f"Waiting... {n}")
-                                        _ = await loop.run_in_executor(None, zoom.check_banners)
-                                        _ = await loop.run_in_executor(None, zoom.show_toolbars)
-                                except Exception as e:
-                                    _LOGGER.info(f"Leaving... {repr(e)}")
+                            asyncio.create_task(zoom.post_join())
+                            try:
+                                n = 180
+                                while n > 0:
+                                    await asyncio.sleep(1)
+                                    n -= 1
+                                    _LOGGER.info(f"Waiting... {n}")
+                            except Exception as e:
+                                import shutil
+                                shutil.copytree("/home/nonroot/.zoom", "/home/nonroot/tmp/zoom")
+                                _LOGGER.info(f"Leaving... {repr(e)}")
 
 
 if __name__ == "__main__":
