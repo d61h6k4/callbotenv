@@ -72,20 +72,30 @@ class ZoomApp:
         self,
         proc: asyncio.subprocess.Process,
         logger: logging.Logger,
-        name: str = "Debug bot",
+        email: str = "",
+        password: str = "",
+        screenshots_dir: Path = None,
+        name: str = "AI-kit Meeting Bot",
     ):
         self.proc = proc
         self.logger = logger
+        self.email = email
+        self.password = password
         self.name = name
-
+        
+        if email:
+            self.session_id = base64.b64encode(email.encode("utf8")).decode("utf8")
+            if screenshots_dir:
+                self.screenshots_dir = screenshots_dir / self.session_id
+        
         self._view_changed = False
         self._changed_to_fullscreen = False
         self._stop_video = False
         self._audio_muted = False
 
         self.r = runfiles.Create()
-
         self._pyautogui = None
+        self._prepared = False
 
     @property
     def pyautogui(self):
@@ -98,7 +108,11 @@ class ZoomApp:
     @classmethod
     async def create(
         cls,
-        logger
+        logger,
+        email: str = "",
+        password: str = "",
+        screenshots_dir: Path = None,
+        name: str = "AI-kit Meeting Bot",
     ):
         configs = Path("/home/nonroot/.config")
         configs.mkdir(parents=True, exist_ok=True)
@@ -112,13 +126,15 @@ class ZoomApp:
 
         if proc.returncode is not None:
             _, err = await proc.communicate()
-            raise RuntimeError(
-                f"Zoom did not start ({proc.returncode}): zoom\n{err.decode('utf8')}"
-            )
+            raise RuntimeError(f"Zoom did not start ({proc.returncode}): zoom\n{err.decode('utf8')}")
 
         return cls(
             proc,
             logger,
+            email,
+            password,
+            screenshots_dir,
+            name=name,
         )
 
     async def exit(self):
@@ -135,13 +151,13 @@ class ZoomApp:
 
         return meeting_id, pwd
 
-    def _wait_for(self, element_image: Path, attempts: int = 30):
+    def _wait_for(self, element_image: Path, attempts: int = 30) -> None:
         assert element_image.exists(), f"{element_image} doesn't exist"
         # Wait for zoom is started
         while attempts > 0:
             try:
                 self.pyautogui.locateCenterOnScreen(str(element_image), confidence=0.8)
-            except Exception as e:
+            except Exception:
                 time.sleep(1)
                 attempts -= 1
             else:
@@ -154,14 +170,14 @@ class ZoomApp:
             self.r.Rlocation(f"_main/examples/app/zoom_elements/{name}.png")
         )
 
-    def _click_on_element(self, element_image: Path):
+    def _click_on_element(self, element_image: Path) -> None:
         x, y = self.pyautogui.locateCenterOnScreen(str(element_image), confidence=0.9)
         try:
             self.pyautogui.click(x, y)
         except TypeError as e:
             raise RuntimeError(f"Failed to click on {element_image}") from e
 
-    def _join(self):
+    def _join(self) -> None:
         join_meeting = self._get_image_by_name("join_meeting")
         self._wait_for(join_meeting)
         self._click_on_element(join_meeting)
@@ -247,20 +263,22 @@ class ZoomApp:
 
         _ = await loop.run_in_executor(None, self._click_on_element, join_with_computer_audio)
 
-        # Enter fullscreen
-        with self.pyautogui.hold('alt'):
-            self.pyautogui.press('f11')
+        # Wait for the meeting to start
+        await asyncio.sleep(5)
 
-        # Disable entering to the gallery view, because during sharing screen
-        # speaker's image is too big.
-        # _ = await loop.run_in_executor(None, self._gallery_view)
+        self._prepared = True
+
         while True:
             _ = await loop.run_in_executor(None, self._check_banners)
-            _ = await loop.run_in_executor(None, self._sbs_speaker_view)
             _ = await loop.run_in_executor(None, self._fullscreen)
+            _ = await loop.run_in_executor(None, self._click_at_side)
+            _ = await loop.run_in_executor(None, self._gallery_view)
+            _ = await loop.run_in_executor(None, self._click_at_side)
+            _ = await loop.run_in_executor(None, self._sbs_speaker_view)
+            _ = await loop.run_in_executor(None, self._click_at_side)
             await asyncio.sleep(30)
 
-    def _fullscreen(self):
+    def _fullscreen(self) -> None:
         if self._changed_to_fullscreen:
             return
 
@@ -271,27 +289,15 @@ class ZoomApp:
             # Seems zoom hasn't been in fullscreen yet
             # so we can't find the view button
             # Enter fullscreen
-            with self.pyautogui.hold('alt'):
-                self.pyautogui.press('f11')
+            with self.pyautogui.hold("alt"):
+                self.pyautogui.press("f11")
+
+            self._changed_to_fullscreen = True
             return
 
-        # Hide window
-        try:
-            self._click_on_element(view)
-        except Exception:
-            ...
-
-        # fullscreen = self._get_image_by_name("fullscreen")
-        # try:
-        #     self._wait_for(fullscreen, attempts=3)
-        #     self._click_on_element(fullscreen)
-        #     self._changed_to_fullscreen = True
-        # except Exception:
+    def _gallery_view(self) -> None:
+        # if self._view_changed:
         #     return
-
-    def _gallery_view(self):
-        if self._view_changed:
-            return
 
         view = self._get_image_by_name("view")
         try:
@@ -305,10 +311,13 @@ class ZoomApp:
             self._click_on_element(gallery_view)
             self._view_changed = True
         except Exception:
-            ...
+            # close view
+            try:
+                self._click_on_element(view)
+            except Exception:
+                return
 
-
-    def _sbs_speaker_view(self):
+    def _sbs_speaker_view(self) -> None:
         view = self._get_image_by_name("view")
         try:
             self._click_on_element(view)
@@ -328,7 +337,7 @@ class ZoomApp:
             except Exception:
                 return
 
-    def _check_banners(self):
+    def _check_banners(self) -> bool:
         ok = self._get_image_by_name("ok")
         try:
             self._click_on_element(ok)
@@ -352,10 +361,35 @@ class ZoomApp:
 
         return False
 
-
-    def _show_toolbars(self):
+    def _show_toolbars(self) -> None:
         # Mouse move to show toolbar
         width, height = self.pyautogui.size()
-        y = (height / 2)
+        y = height / 2
         self.pyautogui.moveTo(0, y, duration=0.5)
         self.pyautogui.moveTo(width - 1, y, duration=0.5)
+        
+    def _click_at_side(self) -> None:
+        # Click on the left side of the screen
+        width, height = self.pyautogui.size()
+        y = height / 2
+        x = width / 2
+        self.pyautogui.click(x, y)
+
+    def send_message(self, message: str) -> None:
+        chat_icon = self._get_image_by_name("chat_icon")
+        self._click_on_element(chat_icon)
+        self._wait_for(chat_icon, attempts=3)
+
+        insert_message_icon = self._get_image_by_name("message_here")
+        self._click_on_element(insert_message_icon)
+        self._wait_for(insert_message_icon, attempts=1)
+
+        self.pyautogui.write(message, interval=0.025)
+        self.pyautogui.press("enter")
+        self._click_on_element(chat_icon)
+
+    async def send_welcome_message(self, message: str) -> None:
+        while not self._prepared:
+            await asyncio.sleep(1)
+
+        self.send_message(message)
