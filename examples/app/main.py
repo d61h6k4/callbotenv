@@ -32,7 +32,7 @@ async def main():
                                 return
 
                             asyncio.create_task(zoom.post_join())
-                            asyncio.create_task(zoom.send_welcome_message("Hello, world!"))
+                            await zoom.send_welcome_message("Hello, world!")
                             try:
                                 n = 180
                                 while n > 0:

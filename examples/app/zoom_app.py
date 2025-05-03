@@ -95,7 +95,8 @@ class ZoomApp:
 
         self.r = runfiles.Create()
         self._pyautogui = None
-        self._prepared = False
+        self._prepared = asyncio.Event()
+        self._message_lock = asyncio.Lock() # Lock for sending all messages
 
     @property
     def pyautogui(self):
@@ -266,16 +267,17 @@ class ZoomApp:
         # Wait for the meeting to start
         await asyncio.sleep(5)
 
-        self._prepared = True
+        self._prepared.set()
 
         while True:
-            _ = await loop.run_in_executor(None, self._check_banners)
-            _ = await loop.run_in_executor(None, self._fullscreen)
-            _ = await loop.run_in_executor(None, self._click_at_side)
-            _ = await loop.run_in_executor(None, self._gallery_view)
-            _ = await loop.run_in_executor(None, self._click_at_side)
-            _ = await loop.run_in_executor(None, self._sbs_speaker_view)
-            _ = await loop.run_in_executor(None, self._click_at_side)
+            async with self._message_lock:
+                _ = await loop.run_in_executor(None, self._check_banners)
+                _ = await loop.run_in_executor(None, self._fullscreen)
+                _ = await loop.run_in_executor(None, self._click_at_side)
+                _ = await loop.run_in_executor(None, self._gallery_view)
+                _ = await loop.run_in_executor(None, self._click_at_side)
+                _ = await loop.run_in_executor(None, self._sbs_speaker_view)
+                _ = await loop.run_in_executor(None, self._click_at_side)
             await asyncio.sleep(30)
 
     def _fullscreen(self) -> None:
@@ -375,21 +377,21 @@ class ZoomApp:
         x = width / 2
         self.pyautogui.click(x, y)
 
-    def send_message(self, message: str) -> None:
-        chat_icon = self._get_image_by_name("chat_icon")
-        self._click_on_element(chat_icon)
-        self._wait_for(chat_icon, attempts=3)
+    async def send_message(self, message: str) -> None:
+        async with self._message_lock:
+            self.logger.info("Sending welcome message")
+            chat_icon = self._get_image_by_name("chat_icon")
+            self._click_on_element(chat_icon)
+            self._wait_for(chat_icon, attempts=3)
 
-        insert_message_icon = self._get_image_by_name("message_here")
-        self._click_on_element(insert_message_icon)
-        self._wait_for(insert_message_icon, attempts=1)
+            insert_message_icon = self._get_image_by_name("message_here")
+            self._click_on_element(insert_message_icon)
+            self._wait_for(insert_message_icon, attempts=1)
 
-        self.pyautogui.write(message, interval=0.025)
-        self.pyautogui.press("enter")
-        self._click_on_element(chat_icon)
+            self.pyautogui.write(message, interval=0.025)
+            self.pyautogui.press("enter")
+            self._click_on_element(chat_icon)
 
     async def send_welcome_message(self, message: str) -> None:
-        while not self._prepared:
-            await asyncio.sleep(1)
-
-        self.send_message(message)
+        await self._prepared.wait()
+        await self.send_message(message)
