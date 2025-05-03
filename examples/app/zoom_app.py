@@ -96,7 +96,7 @@ class ZoomApp:
         self.r = runfiles.Create()
         self._pyautogui = None
         self._prepared = asyncio.Event()
-        self._message_lock = asyncio.Lock()
+        self._message_lock = asyncio.Lock() # Lock for sending all messages
 
     @property
     def pyautogui(self):
