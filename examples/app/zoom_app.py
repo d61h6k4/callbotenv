@@ -95,8 +95,8 @@ class ZoomApp:
 
         self.r = runfiles.Create()
         self._pyautogui = None
-        self._prepared = False
-        self._welcome_message_lock = asyncio.Lock()
+        self._prepared = asyncio.Event()
+        self._message_lock = asyncio.Lock()
 
     @property
     def pyautogui(self):
@@ -267,16 +267,17 @@ class ZoomApp:
         # Wait for the meeting to start
         await asyncio.sleep(5)
 
-        self._prepared = True
+        self._prepared.set()
 
         while True:
-            _ = await loop.run_in_executor(None, self._check_banners)
-            _ = await loop.run_in_executor(None, self._fullscreen)
-            _ = await loop.run_in_executor(None, self._click_at_side)
-            _ = await loop.run_in_executor(None, self._gallery_view)
-            _ = await loop.run_in_executor(None, self._click_at_side)
-            _ = await loop.run_in_executor(None, self._sbs_speaker_view)
-            _ = await loop.run_in_executor(None, self._click_at_side)
+            async with self._message_lock:
+                _ = await loop.run_in_executor(None, self._check_banners)
+                _ = await loop.run_in_executor(None, self._fullscreen)
+                _ = await loop.run_in_executor(None, self._click_at_side)
+                _ = await loop.run_in_executor(None, self._gallery_view)
+                _ = await loop.run_in_executor(None, self._click_at_side)
+                _ = await loop.run_in_executor(None, self._sbs_speaker_view)
+                _ = await loop.run_in_executor(None, self._click_at_side)
             await asyncio.sleep(30)
 
     def _fullscreen(self) -> None:
@@ -377,7 +378,7 @@ class ZoomApp:
         self.pyautogui.click(x, y)
 
     async def send_message(self, message: str) -> None:
-        async with self._welcome_message_lock:
+        async with self._message_lock:
             self.logger.info("Sending welcome message")
             chat_icon = self._get_image_by_name("chat_icon")
             self._click_on_element(chat_icon)
@@ -392,7 +393,5 @@ class ZoomApp:
             self._click_on_element(chat_icon)
 
     async def send_welcome_message(self, message: str) -> None:
-        while not self._prepared:
-            await asyncio.sleep(1)
-
+        await self._prepared.wait()
         await self.send_message(message)
