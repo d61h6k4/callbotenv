@@ -19,7 +19,7 @@ Ensure that you have [Bazel](https://bazel.build/) installed on your system befo
    ```
 3. Execute the Docker command to run the Zoom meeting bot. Replace the MEETING_URL with your specific Zoom meeting link:
    ```bash
-   docker run --volume `pwd`/tmp:/tmp --rm -e "MEETING_URL=<zoom link>" gcr.io/examples:latest
+   docker run --volume `pwd`/tmp:/home/nonroot/tmp --rm -e "MEETING_URL=<your-zoom-meeting-url>" gcr.io/examples:latest
    ```
 This command will run the bot and save the output video file in the `tmp` folder.
 
