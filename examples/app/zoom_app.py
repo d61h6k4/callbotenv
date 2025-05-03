@@ -96,6 +96,7 @@ class ZoomApp:
         self.r = runfiles.Create()
         self._pyautogui = None
         self._prepared = False
+        self._welcome_message_lock = asyncio.Lock()
 
     @property
     def pyautogui(self):
@@ -375,21 +376,23 @@ class ZoomApp:
         x = width / 2
         self.pyautogui.click(x, y)
 
-    def send_message(self, message: str) -> None:
-        chat_icon = self._get_image_by_name("chat_icon")
-        self._click_on_element(chat_icon)
-        self._wait_for(chat_icon, attempts=3)
+    async def send_message(self, message: str) -> None:
+        async with self._welcome_message_lock:
+            self.logger.info("Sending welcome message")
+            chat_icon = self._get_image_by_name("chat_icon")
+            self._click_on_element(chat_icon)
+            self._wait_for(chat_icon, attempts=3)
 
-        insert_message_icon = self._get_image_by_name("message_here")
-        self._click_on_element(insert_message_icon)
-        self._wait_for(insert_message_icon, attempts=1)
+            insert_message_icon = self._get_image_by_name("message_here")
+            self._click_on_element(insert_message_icon)
+            self._wait_for(insert_message_icon, attempts=1)
 
-        self.pyautogui.write(message, interval=0.025)
-        self.pyautogui.press("enter")
-        self._click_on_element(chat_icon)
+            self.pyautogui.write(message, interval=0.025)
+            self.pyautogui.press("enter")
+            self._click_on_element(chat_icon)
 
     async def send_welcome_message(self, message: str) -> None:
         while not self._prepared:
             await asyncio.sleep(1)
 
-        self.send_message(message)
+        await self.send_message(message)
