@@ -2,4 +2,3 @@ nodriver
 pyautogui
 python-xlib>=0.33
 opencv-python
-Pillow

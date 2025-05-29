@@ -7,7 +7,6 @@ from pathlib import Path
 
 import logging
 from python.runfiles import runfiles  # pyright: ignore
-from PIL import ImageChops, ImageStat
 
 _LOGGER = logging.getLogger(__name__)
 
