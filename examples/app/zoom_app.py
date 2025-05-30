@@ -168,15 +168,18 @@ class ZoomApp:
 
     def _get_image_by_name(self, name: str) -> Path:
         return Path(
-            self.r.Rlocation(f"_main/examples/app/zoom_elements/{name}.png")
+            self.r.Rlocation(f"_main/examples/app/new_zoom_elements/{name}.png")
         )
 
     def _click_on_element(self, element_image: Path) -> None:
+        self.logger.info(f"Clicking on {element_image}")
         x, y = self.pyautogui.locateCenterOnScreen(str(element_image), confidence=0.9)
         try:
             self.pyautogui.click(x, y)
+            time.sleep(5)
         except TypeError as e:
             raise RuntimeError(f"Failed to click on {element_image}") from e
+        
 
     def _join(self) -> None:
         join_meeting = self._get_image_by_name("join_meeting")
@@ -215,6 +218,7 @@ class ZoomApp:
             self.pyautogui.write(self.pwd, interval=0.1)
 
             join = self._get_image_by_name("join")
+            self._wait_for(join, attempts=5)
             self._click_on_element(join)
 
         # Accept the agreement
@@ -231,8 +235,8 @@ class ZoomApp:
         av_device_select_form = self._get_image_by_name("av_device_select_form")
         self._wait_for(av_device_select_form)
 
-        join = self._get_image_by_name("join")
-        self._click_on_element(join)
+        join_slim = self._get_image_by_name("join_slim")
+        self._click_on_element(join_slim)
 
     async def join(self, meeting_url):
         self.meeting_id, self.pwd = self.extract_meeting_id_and_pwd(meeting_url)
@@ -382,9 +386,9 @@ class ZoomApp:
             self.logger.info("Sending welcome message")
             chat_icon = self._get_image_by_name("chat_icon")
             self._click_on_element(chat_icon)
-            self._wait_for(chat_icon, attempts=3)
+            self._wait_for(chat_icon, attempts=5)
 
-            insert_message_icon = self._get_image_by_name("message_here")
+            insert_message_icon = self._get_image_by_name("message_everyone")
             self._click_on_element(insert_message_icon)
             self._wait_for(insert_message_icon, attempts=1)
 

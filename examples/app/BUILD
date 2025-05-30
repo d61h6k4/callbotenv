@@ -17,11 +17,12 @@ py_library(
     name = "zoom_app",
     srcs = ["zoom_app.py"],
     data = [
-        "//examples/app/zoom_elements:images"
+        "//examples/app/new_zoom_elements:images"
     ],
     deps = [
         "@pip//pyautogui",
         "@pip//opencv_python",
+        "@pip//pillow",
         "@rules_python//python/runfiles"
     ]
 )

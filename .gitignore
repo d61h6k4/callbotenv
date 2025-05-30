@@ -188,4 +188,7 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+# tmp
+tmp/
+
 # End of https://www.toptal.com/developers/gitignore/api/bazel,python
